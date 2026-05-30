@@ -3,10 +3,11 @@
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import Beams from "@/components/Beams";
+import PixelBlast from "@/components/PixelBlast";
 import SoftAurora from "@/components/SoftAurora";
 
 interface PageBackgroundProps {
-  variant: "aurora" | "beams";
+  variant: "aurora" | "beams" | "pixel-blast";
 }
 
 export function PageBackground({ variant }: PageBackgroundProps) {
@@ -34,6 +35,34 @@ export function PageBackground({ variant }: PageBackgroundProps) {
           rotation={30}
         />
         <div className={isDark ? "absolute inset-0 bg-slate-950/45" : "absolute inset-0 bg-white/62"} />
+      </div>
+    );
+  }
+
+  if (variant === "pixel-blast") {
+    return (
+      <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className={isDark ? "absolute inset-0 bg-slate-950" : "absolute inset-0 bg-white"} />
+        <PixelBlast
+          variant="square"
+          pixelSize={4}
+          color="#B497CF"
+          patternScale={2}
+          patternDensity={1}
+          pixelSizeJitter={0}
+          enableRipples
+          rippleSpeed={0.4}
+          rippleThickness={0.12}
+          rippleIntensityScale={1.5}
+          liquid={false}
+          liquidStrength={0.12}
+          liquidRadius={1.2}
+          liquidWobbleSpeed={5}
+          speed={0.5}
+          edgeFade={0.25}
+          transparent
+        />
+        <div className={isDark ? "pointer-events-none absolute inset-0 bg-slate-950/30" : "pointer-events-none absolute inset-0 bg-white/62"} />
       </div>
     );
   }

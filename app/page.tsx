@@ -16,7 +16,7 @@ export default function LandingPage() {
 
   return (
     <div className="relative isolate min-h-screen overflow-hidden">
-      <PageBackground variant="aurora" />
+      <PageBackground variant="pixel-blast" />
       <section className="relative min-h-[500px] overflow-hidden">
         <div className="relative mx-auto flex min-h-[500px] max-w-7xl flex-col justify-center px-4 py-20 sm:px-6 lg:px-8">
           <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-primary">
