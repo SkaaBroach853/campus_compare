@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { GitCompare, Heart, MapPin, Star, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -24,6 +25,8 @@ export default function CollegeDetailPage() {
   const [college, setCollege] = useState<College | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const { compareList, addToCompare, removeFromCompare } = useCompareStore();
   const { savedIds } = useSavedStore();
   const { toggleSavedRemote } = useSaved();
@@ -81,6 +84,35 @@ export default function CollegeDetailPage() {
   const isSaved = savedIds.includes(college.id);
   const compareDisabled = !isCompared && compareList.length >= 3;
 
+  const handleSave = async () => {
+    setActionError(null);
+    setIsSaving(true);
+
+    try {
+      await toggleSavedRemote(college.id);
+    } catch (saveError) {
+      setActionError(saveError instanceof Error ? saveError.message : "Unable to update saved colleges. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCompare = () => {
+    setActionError(null);
+
+    if (compareDisabled) {
+      setActionError("You can compare up to 3 colleges at a time. Remove one from Compare first.");
+      return;
+    }
+
+    if (isCompared) {
+      removeFromCompare(college.id);
+      return;
+    }
+
+    addToCompare(college);
+  };
+
   return (
     <div>
       <section className="relative min-h-[420px] overflow-hidden">
@@ -93,19 +125,29 @@ export default function CollegeDetailPage() {
           </p>
           <h1 className="mt-3 max-w-4xl text-4xl font-bold sm:text-5xl">{college.name}</h1>
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button variant="secondary" onClick={() => void toggleSavedRemote(college.id)}>
+            <Button variant="secondary" onClick={handleSave} disabled={isSaving}>
               <Heart className={isSaved ? "fill-current" : ""} />
-              {isSaved ? "Saved" : "Save"}
+              {isSaving ? "Saving..." : isSaved ? "Saved" : "Save"}
             </Button>
             <Button
               variant="secondary"
-              disabled={compareDisabled}
-              onClick={() => (isCompared ? removeFromCompare(college.id) : addToCompare(college))}
+              onClick={handleCompare}
+              title={compareDisabled ? "You can compare up to 3 colleges at a time." : undefined}
             >
               <GitCompare />
               {isCompared ? "Remove from Compare" : "Add to Compare"}
             </Button>
           </div>
+          {actionError ? (
+            <p className="mt-4 max-w-xl rounded-md bg-white/15 p-3 text-sm text-white backdrop-blur">
+              {actionError}{" "}
+              {actionError.toLowerCase().includes("log in") ? (
+                <Link href="/login" className="font-semibold underline underline-offset-4">
+                  Login
+                </Link>
+              ) : null}
+            </p>
+          ) : null}
         </div>
       </section>
 

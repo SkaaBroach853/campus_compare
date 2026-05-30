@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { GitCompare, Heart, MapPin, Star } from "lucide-react";
+import { useState } from "react";
 import PixelCard from "@/components/PixelCard";
 import { Button } from "@/components/ui/button";
 import { useCompareStore } from "@/store/useCompareStore";
@@ -22,17 +23,44 @@ const currencyFormatter = new Intl.NumberFormat("en-IN", {
 export function CollegeCard({ college, onToggleSaved }: CollegeCardProps) {
   const { compareList, addToCompare, removeFromCompare } = useCompareStore();
   const { savedIds, toggleSaved } = useSavedStore();
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const isCompared = compareList.some((item) => item.id === college.id);
   const isSaved = savedIds.includes(college.id);
   const compareDisabled = !isCompared && compareList.length >= 3;
 
   const handleSave = async () => {
-    if (onToggleSaved) {
-      await onToggleSaved(college.id);
+    setActionError(null);
+    setIsSaving(true);
+
+    try {
+      if (onToggleSaved) {
+        await onToggleSaved(college.id);
+        return;
+      }
+
+      toggleSaved(college.id);
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : "Unable to update saved colleges. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCompare = () => {
+    setActionError(null);
+
+    if (compareDisabled) {
+      setActionError("You can compare up to 3 colleges at a time. Remove one from Compare first.");
       return;
     }
 
-    toggleSaved(college.id);
+    if (isCompared) {
+      removeFromCompare(college.id);
+      return;
+    }
+
+    addToCompare(college);
   };
 
   return (
@@ -76,20 +104,30 @@ export function CollegeCard({ college, onToggleSaved }: CollegeCardProps) {
         </div>
 
         <div className="flex gap-2">
-          <Button variant={isSaved ? "secondary" : "outline"} className="flex-1" onClick={handleSave}>
+          <Button variant={isSaved ? "secondary" : "outline"} className="flex-1" onClick={handleSave} disabled={isSaving}>
             <Heart className={isSaved ? "fill-current" : ""} />
-            {isSaved ? "Saved" : "Save"}
+            {isSaving ? "Saving..." : isSaved ? "Saved" : "Save"}
           </Button>
           <Button
             variant={isCompared ? "secondary" : "outline"}
             className="flex-1"
-            disabled={compareDisabled}
-            onClick={() => (isCompared ? removeFromCompare(college.id) : addToCompare(college))}
+            onClick={handleCompare}
+            title={compareDisabled ? "You can compare up to 3 colleges at a time." : undefined}
           >
             <GitCompare />
             {isCompared ? "Added" : "Compare"}
           </Button>
         </div>
+        {actionError ? (
+          <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+            {actionError}{" "}
+            {actionError.toLowerCase().includes("log in") ? (
+              <Link href="/login" className="font-medium underline underline-offset-4">
+                Login
+              </Link>
+            ) : null}
+          </p>
+        ) : null}
       </div>
     </article>
   );

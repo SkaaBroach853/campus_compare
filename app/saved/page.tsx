@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CollegeCard } from "@/components/CollegeCard";
 import { EmptyState } from "@/components/EmptyState";
@@ -10,8 +9,9 @@ import { createClient } from "@/lib/supabase";
 import { useSaved } from "@/hooks/useSaved";
 
 export default function SavedPage() {
-  const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isAuthed, setIsAuthed] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
   const { savedColleges, loading, error, toggleSavedRemote } = useSaved();
 
   useEffect(() => {
@@ -19,18 +19,19 @@ export default function SavedPage() {
       const supabase = createClient();
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
 
-      if (!user) {
-        router.replace("/login");
-        return;
+      if (userError) {
+        setAuthError("Unable to check your login status. Please refresh or login again.");
       }
 
+      setIsAuthed(Boolean(user));
       setCheckingAuth(false);
     }
 
     void checkAuth();
-  }, [router]);
+  }, []);
 
   if (checkingAuth) {
     return (
@@ -42,6 +43,28 @@ export default function SavedPage() {
               <SkeletonCard key={index} />
             ))}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (authError) {
+    return (
+      <div className="relative isolate min-h-screen overflow-hidden">
+        <PageBackground variant="beams" />
+        <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+          <EmptyState message={authError} ctaLabel="Login" ctaHref="/login" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthed) {
+    return (
+      <div className="relative isolate min-h-screen overflow-hidden">
+        <PageBackground variant="beams" />
+        <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+          <EmptyState message="Please login to view your saved colleges." ctaLabel="Login" ctaHref="/login" />
         </div>
       </div>
     );
