@@ -1,0 +1,50 @@
+.beams-container {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--beam-color) 16%, transparent), transparent 32%),
+    radial-gradient(circle at 80% 10%, color-mix(in srgb, var(--beam-color) 10%, transparent), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 55%);
+  transform: scale(calc(1 + var(--beam-scale)));
+}
+
+.beams-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: calc(var(--beam-noise) * 0.04);
+  background-image:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: radial-gradient(circle at center, black, transparent 72%);
+}
+
+.beam-line {
+  position: absolute;
+  top: -35%;
+  width: var(--beam-width);
+  border-radius: 999px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in srgb, var(--beam-color) 15%, transparent) 24%,
+    color-mix(in srgb, var(--beam-color) 90%, transparent) 52%,
+    color-mix(in srgb, var(--beam-color) 12%, transparent) 78%,
+    transparent 100%
+  );
+  filter: blur(0.2px) drop-shadow(0 0 16px color-mix(in srgb, var(--beam-color) 80%, transparent));
+  transform: rotate(var(--beam-rotation));
+  animation: beam-slide var(--beam-speed) linear infinite;
+}
+
+@keyframes beam-slide {
+  from {
+    translate: -12rem -35%;
+  }
+
+  to {
+    translate: 12rem 190%;
+  }
+}
