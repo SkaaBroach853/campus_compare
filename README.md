@@ -33,7 +33,14 @@ CampusCompass is a College Discovery Platform MVP for exploring Indian colleges,
 2. Open the SQL Editor.
 3. Run `supabase/schema.sql`.
 4. Enable Email/Password auth in Authentication settings.
-5. Confirm Row Level Security policies are enabled for `colleges` and `saved_colleges`.
+5. In Authentication → URL Configuration, set:
+   - Site URL: your deployed Vercel URL, for example `https://campus-compare.vercel.app`
+   - Redirect URLs:
+     - `http://localhost:3000/auth/callback`
+     - `https://your-vercel-domain.vercel.app/auth/callback`
+6. Confirm Row Level Security policies are enabled for `colleges` and `saved_colleges`.
+
+If an email confirmation link opens `localhost:3000` and says the site cannot be reached, the local development server is not running or Supabase is still using a localhost Site URL. Start the app with `npm run dev`, or update Supabase Authentication URL Configuration to your deployed Vercel domain.
 
 ## Seed Instructions
 
